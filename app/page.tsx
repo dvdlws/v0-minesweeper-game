@@ -1,7 +1,22 @@
+"use client"
+
+import { useEffect } from "react"
 import Minesweeper from "@/components/minesweeper"
-import AdsenseAd from "@/components/adsense-ad"
+import Link from "next/link"
 
 export default function Home() {
+  useEffect(() => {
+    // Initialize all AdSense ads on the page
+    try {
+      const ads = document.querySelectorAll(".adsbygoogle")
+      ads.forEach(() => {
+        ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+      })
+    } catch (e) {
+      console.error("AdSense error:", e)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4">
       <header className="text-center max-w-3xl px-4">
@@ -10,16 +25,37 @@ export default function Home() {
 
       <div className="w-full max-w-4xl flex justify-center">
         <div className="hidden md:block">
-          <AdsenseAd adSlot="5750387915" />
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5750387915"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
         <div className="block md:hidden">
-          <AdsenseAd adSlot="5750387915" />
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5750387915"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
       </div>
 
       <div className="flex items-start gap-6">
         <div className="hidden lg:block sticky top-4">
-          <AdsenseAd adSlot="5567497039" />
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5567497039"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
 
         <main>
@@ -27,12 +63,26 @@ export default function Home() {
         </main>
 
         <div className="hidden lg:block sticky top-4">
-          <AdsenseAd adSlot="5567497039" />
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5567497039"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
       </div>
 
       <div className="block lg:hidden">
-        <AdsenseAd adSlot="5567497039" />
+        <ins
+          className="adsbygoogle"
+          style={{ display: "block" }}
+          data-ad-client="ca-pub-3252021796682458"
+          data-ad-slot="5567497039"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        ></ins>
       </div>
 
       <article className="max-w-3xl px-4 mt-8 space-y-6 text-center">
@@ -45,18 +95,21 @@ export default function Home() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold mb-3">How to Play Minesweeper</h2>
+          <h2 className="text-2xl font-bold mb-3">Quick Start</h2>
           <div className="text-muted-foreground leading-relaxed space-y-2">
             <p>
-              <strong>Left Click:</strong> Reveal a cell. If it contains a mine, you lose! Numbers indicate how many
-              mines are adjacent to that cell.
+              <strong>Left Click:</strong> Reveal cells. Numbers show adjacent mines.
             </p>
             <p>
-              <strong>Right Click:</strong> Place or remove a flag to mark potential mine locations. Use flags
-              strategically to track dangerous cells.
+              <strong>Right Click:</strong> Flag potential mines.
             </p>
             <p>
-              <strong>Goal:</strong> Reveal all cells that don't contain mines. Win by clearing the entire board safely!
+              <strong>Goal:</strong> Clear all safe cells without hitting a mine!
+            </p>
+            <p className="mt-4">
+              <Link href="/how-to-play" className="text-primary hover:underline font-semibold">
+                Read the complete guide →
+              </Link>
             </p>
           </div>
         </section>
@@ -106,6 +159,23 @@ export default function Home() {
 
       <footer className="mt-12 text-center text-sm text-muted-foreground">
         <p>© 2025 Minesweeper Online - Free Classic Puzzle Game</p>
+        <nav className="flex gap-4 justify-center mt-3 flex-wrap">
+          <Link href="/tools" className="text-primary hover:underline">
+            Tools
+          </Link>
+          <Link href="/how-to-play" className="text-primary hover:underline">
+            How to Play
+          </Link>
+          <Link href="/strategy" className="text-primary hover:underline">
+            Strategy Guide
+          </Link>
+          <Link href="/history" className="text-primary hover:underline">
+            History
+          </Link>
+          <Link href="/privacy" className="text-primary hover:underline">
+            Privacy Policy
+          </Link>
+        </nav>
       </footer>
     </div>
   )

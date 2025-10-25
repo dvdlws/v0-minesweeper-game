@@ -4,9 +4,10 @@ import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { RotateCcw, Trophy, X } from "lucide-react"
+import { RotateCcw, Trophy, X, Clock, Zap } from "lucide-react"
 import AdsenseAd from "./adsense-ad"
 
+type GameMode = "classic" | "speed" | "custom"
 type Difficulty = "easy" | "medium" | "hard"
 
 interface Cell {
@@ -22,8 +23,16 @@ const DIFFICULTIES = {
   hard: { rows: 16, cols: 16, mines: 80 },
 }
 
+const CUSTOM_SIZES = {
+  small: { rows: 9, cols: 9, mines: 10 },
+  medium: { rows: 16, cols: 16, mines: 40 },
+  large: { rows: 30, cols: 16, mines: 99 },
+}
+
 export default function Minesweeper() {
+  const [gameMode, setGameMode] = useState<GameMode>("classic")
   const [difficulty, setDifficulty] = useState<Difficulty>("easy")
+  const [customSize, setCustomSize] = useState<keyof typeof CUSTOM_SIZES>("medium")
   const [board, setBoard] = useState<Cell[][]>([])
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">("playing")
   const [flagCount, setFlagCount] = useState(0)
@@ -33,10 +42,15 @@ export default function Minesweeper() {
   const [gamesPlayed, setGamesPlayed] = useState(0)
   const [gamesSinceLastAd, setGamesSinceLastAd] = useState(0)
   const [showInterstitial, setShowInterstitial] = useState(false)
+  const [speedTimeLimit, setSpeedTimeLimit] = useState(60)
 
-  const config = DIFFICULTIES[difficulty]
+  const config = gameMode === "custom" ? CUSTOM_SIZES[customSize] : DIFFICULTIES[difficulty]
 
-  const getCellSize = () => "w-6 h-6 text-xs"
+  const getCellSize = () => {
+    if (gameMode === "custom" && customSize === "small") return "w-8 h-8 text-sm"
+    if (gameMode === "custom" && customSize === "large") return "w-5 h-5 text-xs"
+    return "w-6 h-6 text-xs"
+  }
 
   const initializeBoard = useCallback(() => {
     const newBoard: Cell[][] = Array(config.rows)
@@ -52,7 +66,6 @@ export default function Minesweeper() {
           })),
       )
 
-    // Place mines randomly
     let minesPlaced = 0
     while (minesPlaced < config.mines) {
       const row = Math.floor(Math.random() * config.rows)
@@ -63,7 +76,6 @@ export default function Minesweeper() {
       }
     }
 
-    // Calculate neighbor mines
     for (let row = 0; row < config.rows; row++) {
       for (let col = 0; col < config.cols; col++) {
         if (!newBoard[row][col].isMine) {
@@ -94,7 +106,10 @@ export default function Minesweeper() {
     setTimer(0)
     setIsTimerRunning(false)
     setScore(0)
-  }, [config.rows, config.cols, config.mines])
+    if (gameMode === "speed") {
+      setSpeedTimeLimit(difficulty === "easy" ? 90 : difficulty === "medium" ? 60 : 45)
+    }
+  }, [config.rows, config.cols, config.mines, gameMode, difficulty])
 
   useEffect(() => {
     initializeBoard()
@@ -104,27 +119,19 @@ export default function Minesweeper() {
     let interval: NodeJS.Timeout
     if (isTimerRunning && gameStatus === "playing") {
       interval = setInterval(() => {
-        setTimer((prev) => Math.min(prev + 1, 999))
+        setTimer((prev) => {
+          const newTime = prev + 1
+          if (gameMode === "speed" && newTime >= speedTimeLimit) {
+            setGameStatus("lost")
+            setIsTimerRunning(false)
+            return speedTimeLimit
+          }
+          return Math.min(newTime, 999)
+        })
       }, 1000)
     }
     return () => clearInterval(interval)
-  }, [isTimerRunning, gameStatus])
-
-  useEffect(() => {
-    if (gameStatus !== "playing") {
-      const newGamesPlayed = gamesPlayed + 1
-      const newGamesSinceLastAd = gamesSinceLastAd + 1
-
-      setGamesPlayed(newGamesPlayed)
-      setGamesSinceLastAd(newGamesSinceLastAd)
-
-      // Show interstitial if at least 3 games have passed and random chance (50%)
-      if (newGamesSinceLastAd >= 3 && Math.random() < 0.5) {
-        setShowInterstitial(true)
-        setGamesSinceLastAd(0)
-      }
-    }
-  }, [gameStatus])
+  }, [isTimerRunning, gameStatus, gameMode, speedTimeLimit])
 
   const revealCell = useCallback(
     (row: number, col: number) => {
@@ -207,7 +214,6 @@ export default function Minesweeper() {
       setScore((prev) => prev + pointsEarned)
       setBoard(newBoard)
 
-      // Check win condition
       const revealedCount = newBoard.flat().filter((c) => c.isRevealed).length
       if (revealedCount === config.rows * config.cols - config.mines) {
         setGameStatus("won")
@@ -276,6 +282,21 @@ export default function Minesweeper() {
     return colors[cell.neighborMines] || ""
   }
 
+  useEffect(() => {
+    if (gameStatus !== "playing") {
+      const newGamesPlayed = gamesPlayed + 1
+      const newGamesSinceLastAd = gamesSinceLastAd + 1
+
+      setGamesPlayed(newGamesPlayed)
+      setGamesSinceLastAd(newGamesSinceLastAd)
+
+      if (newGamesSinceLastAd >= 3 && Math.random() < 0.5) {
+        setShowInterstitial(true)
+        setGamesSinceLastAd(0)
+      }
+    }
+  }, [gameStatus])
+
   if (board.length === 0 || board.length !== config.rows || board[0]?.length !== config.cols) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -312,22 +333,65 @@ export default function Minesweeper() {
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="p-6 shadow-2xl border-4 border-primary/20">
           <div className="flex flex-col items-center gap-6">
-            {/* Difficulty Selector */}
-            <div className="flex gap-2">
-              {(["easy", "medium", "hard"] as Difficulty[]).map((diff) => (
-                <Button
-                  key={diff}
-                  variant={difficulty === diff ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setDifficulty(diff)}
-                  className="font-mono uppercase"
-                >
-                  {diff}
-                </Button>
-              ))}
+            <div className="flex gap-2 flex-wrap justify-center">
+              <Button
+                variant={gameMode === "classic" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setGameMode("classic")}
+                className="font-mono"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Classic
+              </Button>
+              <Button
+                variant={gameMode === "speed" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setGameMode("speed")}
+                className="font-mono"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Speed Mode
+              </Button>
+              <Button
+                variant={gameMode === "custom" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setGameMode("custom")}
+                className="font-mono"
+              >
+                Custom Size
+              </Button>
             </div>
 
-            {/* Game Stats */}
+            {gameMode === "custom" ? (
+              <div className="flex gap-2">
+                {(["small", "medium", "large"] as const).map((size) => (
+                  <Button
+                    key={size}
+                    variant={customSize === size ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCustomSize(size)}
+                    className="font-mono uppercase"
+                  >
+                    {size}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {(["easy", "medium", "hard"] as Difficulty[]).map((diff) => (
+                  <Button
+                    key={diff}
+                    variant={difficulty === diff ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setDifficulty(diff)}
+                    className="font-mono uppercase"
+                  >
+                    {diff}
+                  </Button>
+                ))}
+              </div>
+            )}
+
             <div className="flex items-center gap-4 sm:gap-8 bg-muted p-4 rounded-lg border-2 border-border w-full max-w-md justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xl">💣</span>
@@ -352,6 +416,15 @@ export default function Minesweeper() {
               </div>
             </div>
 
+            {gameMode === "speed" && gameStatus === "playing" && (
+              <div className="bg-yellow-500/10 border-2 border-yellow-500/30 p-3 rounded-lg w-full max-w-md">
+                <div className="flex items-center justify-center gap-2">
+                  <Zap className="w-4 h-4 text-yellow-600" />
+                  <span className="text-sm font-mono text-yellow-600">Time Remaining: {speedTimeLimit - timer}s</span>
+                </div>
+              </div>
+            )}
+
             <div className="bg-muted p-3 rounded-lg border-2 border-border w-full max-w-md">
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-mono text-muted-foreground">SCORE:</span>
@@ -359,7 +432,6 @@ export default function Minesweeper() {
               </div>
             </div>
 
-            {/* Game Board */}
             <div className="overflow-auto max-w-full max-h-[600px]">
               <div
                 className="inline-grid gap-0 border-4 border-primary/30 shadow-lg bg-muted/30"
@@ -400,7 +472,6 @@ export default function Minesweeper() {
               </div>
             </div>
 
-            {/* Game Status Message */}
             {gameStatus !== "playing" && (
               <div className="text-center">
                 <p className="text-2xl font-bold font-mono">
@@ -414,10 +485,13 @@ export default function Minesweeper() {
               </div>
             )}
 
-            {/* Instructions */}
             <div className="text-xs text-muted-foreground text-center max-w-md font-mono">
               <p>Left-click to reveal • Right-click to flag</p>
-              <p className="mt-1">Find all mines without clicking on them!</p>
+              <p className="mt-1">
+                {gameMode === "speed"
+                  ? "Beat the clock! Clear the board before time runs out!"
+                  : "Find all mines without clicking on them!"}
+              </p>
             </div>
           </div>
         </Card>
