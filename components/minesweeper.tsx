@@ -399,9 +399,9 @@ export default function Minesweeper() {
           </div>
 
           <div className="w-full flex justify-center">
-            <div className="overflow-auto max-w-full max-h-[600px] scrollbar-stable">
+            <div className="max-w-full">
               <div
-                className="inline-grid gap-0 border-4 border-primary/30 shadow-lg bg-muted/30"
+                className="inline-grid gap-0 border-4 border-primary/30 shadow-lg bg-muted/30 select-none"
                 style={{
                   gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
                 }}
@@ -415,9 +415,11 @@ export default function Minesweeper() {
                       disabled={gameStatus !== "playing"}
                       className={`
                         ${getCellSize()} flex items-center justify-center font-mono font-bold flex-shrink-0
-                        border border-border/20
+                        border-2 select-none
                         ${
-                          cell.isRevealed ? "bg-muted cursor-default" : "bg-background hover:bg-muted/30 cursor-pointer"
+                          cell.isRevealed
+                            ? "bg-muted cursor-default border-border/30"
+                            : "bg-background hover:bg-muted/50 cursor-pointer border-border shadow-sm hover:shadow-md active:shadow-none"
                         }
                         ${cell.isMine && cell.isRevealed && gameStatus === "lost" ? "bg-red-500/20" : ""}
                       `}
