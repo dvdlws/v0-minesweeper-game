@@ -4,8 +4,7 @@ import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { RotateCcw, Trophy, X, Clock, Zap } from "lucide-react"
-import AdsenseAd from "./adsense-ad"
+import { RotateCcw, Trophy, Clock, Zap } from "lucide-react"
 
 type GameMode = "classic" | "speed" | "custom"
 type Difficulty = "easy" | "medium" | "hard"
@@ -39,9 +38,6 @@ export default function Minesweeper() {
   const [timer, setTimer] = useState(0)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [score, setScore] = useState(0)
-  const [gamesPlayed, setGamesPlayed] = useState(0)
-  const [gamesSinceLastAd, setGamesSinceLastAd] = useState(0)
-  const [showInterstitial, setShowInterstitial] = useState(false)
   const [speedTimeLimit, setSpeedTimeLimit] = useState(60)
 
   const config = gameMode === "custom" ? CUSTOM_SIZES[customSize] : DIFFICULTIES[difficulty]
@@ -282,21 +278,6 @@ export default function Minesweeper() {
     return colors[cell.neighborMines] || ""
   }
 
-  useEffect(() => {
-    if (gameStatus !== "playing") {
-      const newGamesPlayed = gamesPlayed + 1
-      const newGamesSinceLastAd = gamesSinceLastAd + 1
-
-      setGamesPlayed(newGamesPlayed)
-      setGamesSinceLastAd(newGamesSinceLastAd)
-
-      if (newGamesSinceLastAd >= 3 && Math.random() < 0.5) {
-        setShowInterstitial(true)
-        setGamesSinceLastAd(0)
-      }
-    }
-  }, [gameStatus])
-
   if (board.length === 0 || board.length !== config.rows || board[0]?.length !== config.cols) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -308,130 +289,116 @@ export default function Minesweeper() {
   }
 
   return (
-    <>
-      {showInterstitial && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-          <div className="relative bg-background rounded-lg p-8 max-w-2xl w-full shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center p-2 sm:p-4">
+      <Card className="p-3 sm:p-6 shadow-2xl border-4 border-primary/20 w-full max-w-full sm:max-w-none">
+        <div className="flex flex-col items-center gap-3 sm:gap-6">
+          <div className="flex gap-2 flex-wrap justify-center w-full">
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowInterstitial(false)}
-              className="absolute top-4 right-4 hover:bg-muted"
+              variant={gameMode === "classic" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setGameMode("classic")}
+              className="font-mono flex-1 sm:flex-none min-w-[100px]"
             >
-              <X className="w-6 h-6" />
+              <Clock className="w-4 h-4 mr-2" />
+              Classic
             </Button>
-            <div className="flex flex-col items-center gap-6">
-              <AdsenseAd adSlot="2278988712" />
-              <Button onClick={() => setShowInterstitial(false)} size="lg" className="mt-2">
-                Continue Playing
-              </Button>
+            <Button
+              variant={gameMode === "speed" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setGameMode("speed")}
+              className="font-mono flex-1 sm:flex-none min-w-[100px]"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Speed Mode
+            </Button>
+            <Button
+              variant={gameMode === "custom" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setGameMode("custom")}
+              className="font-mono flex-1 sm:flex-none min-w-[100px]"
+            >
+              Custom Size
+            </Button>
+          </div>
+
+          {gameMode === "custom" ? (
+            <div className="flex gap-2 w-full sm:w-auto">
+              {(["small", "medium", "large"] as const).map((size) => (
+                <Button
+                  key={size}
+                  variant={customSize === size ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCustomSize(size)}
+                  className="font-mono uppercase flex-1 sm:flex-none"
+                >
+                  {size}
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-2 w-full sm:w-auto">
+              {(["easy", "medium", "hard"] as Difficulty[]).map((diff) => (
+                <Button
+                  key={diff}
+                  variant={difficulty === diff ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDifficulty(diff)}
+                  className="font-mono uppercase flex-1 sm:flex-none"
+                >
+                  {diff}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 sm:gap-8 bg-muted p-3 sm:p-4 rounded-lg border-2 border-border w-full max-w-md justify-between">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-lg sm:text-xl">💣</span>
+              <span className="font-mono text-lg sm:text-xl font-bold min-w-[3ch] text-center">
+                {config.mines - flagCount}
+              </span>
+            </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={initializeBoard}
+              className="rounded-full bg-transparent h-8 w-8 sm:h-10 sm:w-10"
+            >
+              {gameStatus === "won" ? (
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
+              ) : gameStatus === "lost" ? (
+                <span className="text-lg sm:text-xl">💀</span>
+              ) : (
+                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
+            </Button>
+
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="font-mono text-lg sm:text-xl font-bold min-w-[3ch] text-center">
+                {timer.toString().padStart(3, "0")}
+              </span>
+              <span className="text-muted-foreground text-xs sm:text-base">s</span>
             </div>
           </div>
-        </div>
-      )}
 
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="p-6 shadow-2xl border-4 border-primary/20">
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex gap-2 flex-wrap justify-center">
-              <Button
-                variant={gameMode === "classic" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setGameMode("classic")}
-                className="font-mono"
-              >
-                <Clock className="w-4 h-4 mr-2" />
-                Classic
-              </Button>
-              <Button
-                variant={gameMode === "speed" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setGameMode("speed")}
-                className="font-mono"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Speed Mode
-              </Button>
-              <Button
-                variant={gameMode === "custom" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setGameMode("custom")}
-                className="font-mono"
-              >
-                Custom Size
-              </Button>
-            </div>
-
-            {gameMode === "custom" ? (
-              <div className="flex gap-2">
-                {(["small", "medium", "large"] as const).map((size) => (
-                  <Button
-                    key={size}
-                    variant={customSize === size ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCustomSize(size)}
-                    className="font-mono uppercase"
-                  >
-                    {size}
-                  </Button>
-                ))}
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                {(["easy", "medium", "hard"] as Difficulty[]).map((diff) => (
-                  <Button
-                    key={diff}
-                    variant={difficulty === diff ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setDifficulty(diff)}
-                    className="font-mono uppercase"
-                  >
-                    {diff}
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            <div className="flex items-center gap-4 sm:gap-8 bg-muted p-4 rounded-lg border-2 border-border w-full max-w-md justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">💣</span>
-                <span className="font-mono text-xl font-bold min-w-[3ch] text-center">{config.mines - flagCount}</span>
-              </div>
-
-              <Button variant="outline" size="icon" onClick={initializeBoard} className="rounded-full bg-transparent">
-                {gameStatus === "won" ? (
-                  <Trophy className="w-5 h-5 text-yellow-500" />
-                ) : gameStatus === "lost" ? (
-                  <span className="text-xl">💀</span>
-                ) : (
-                  <RotateCcw className="w-5 h-5" />
-                )}
-              </Button>
-
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xl font-bold min-w-[3ch] text-center">
-                  {timer.toString().padStart(3, "0")}
-                </span>
-                <span className="text-muted-foreground">s</span>
-              </div>
-            </div>
-
-            {gameMode === "speed" && gameStatus === "playing" && (
-              <div className="bg-yellow-500/10 border-2 border-yellow-500/30 p-3 rounded-lg w-full max-w-md">
-                <div className="flex items-center justify-center gap-2">
-                  <Zap className="w-4 h-4 text-yellow-600" />
-                  <span className="text-sm font-mono text-yellow-600">Time Remaining: {speedTimeLimit - timer}s</span>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-muted p-3 rounded-lg border-2 border-border w-full max-w-md">
+          {gameMode === "speed" && gameStatus === "playing" && (
+            <div className="bg-yellow-500/10 border-2 border-yellow-500/30 p-3 rounded-lg w-full max-w-md">
               <div className="flex items-center justify-center gap-2">
-                <span className="text-sm font-mono text-muted-foreground">SCORE:</span>
-                <span className="font-mono text-2xl font-bold text-primary">{score}</span>
+                <Zap className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm font-mono text-yellow-600">Time Remaining: {speedTimeLimit - timer}s</span>
               </div>
             </div>
+          )}
 
+          <div className="bg-muted p-2 sm:p-3 rounded-lg border-2 border-border w-full max-w-md">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs sm:text-sm font-mono text-muted-foreground">SCORE:</span>
+              <span className="font-mono text-xl sm:text-2xl font-bold text-primary">{score}</span>
+            </div>
+          </div>
+
+          <div className="w-full flex justify-center">
             <div className="overflow-auto max-w-full max-h-[600px]">
               <div
                 className="inline-grid gap-0 border-4 border-primary/30 shadow-lg bg-muted/30"
@@ -447,12 +414,12 @@ export default function Minesweeper() {
                       onContextMenu={(e) => toggleFlag(rowIndex, colIndex, e)}
                       disabled={gameStatus !== "playing"}
                       className={`
-                        ${getCellSize()} flex items-center justify-center font-mono font-bold
-                        transition-all duration-100 border border-border/20
+                        ${getCellSize()} flex items-center justify-center font-mono font-bold flex-shrink-0
+                        border border-border/20
                         ${
                           cell.isRevealed
                             ? "bg-muted cursor-default"
-                            : "bg-background hover:bg-muted/50 active:bg-muted cursor-pointer shadow-[inset_2px_2px_0_rgba(255,255,255,0.3),inset_-2px_-2px_0_rgba(0,0,0,0.3)]"
+                            : "bg-background hover:bg-muted/50 cursor-pointer shadow-[inset_1px_1px_0_rgba(255,255,255,0.3),inset_-1px_-1px_0_rgba(0,0,0,0.3)]"
                         }
                         ${cell.isMine && cell.isRevealed && gameStatus === "lost" ? "bg-red-500/20" : ""}
                       `}
@@ -471,31 +438,31 @@ export default function Minesweeper() {
                 )}
               </div>
             </div>
-
-            {gameStatus !== "playing" && (
-              <div className="text-center">
-                <p className="text-2xl font-bold font-mono">
-                  {gameStatus === "won" ? (
-                    <span className="text-yellow-600">🎉 YOU WIN! 🎉</span>
-                  ) : (
-                    <span className="text-red-600">💥 GAME OVER 💥</span>
-                  )}
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">Click the reset button to play again</p>
-              </div>
-            )}
-
-            <div className="text-xs text-muted-foreground text-center max-w-md font-mono">
-              <p>Left-click to reveal • Right-click to flag</p>
-              <p className="mt-1">
-                {gameMode === "speed"
-                  ? "Beat the clock! Clear the board before time runs out!"
-                  : "Find all mines without clicking on them!"}
-              </p>
-            </div>
           </div>
-        </Card>
-      </div>
-    </>
+
+          {gameStatus !== "playing" && (
+            <div className="text-center px-4">
+              <p className="text-xl sm:text-2xl font-bold font-mono">
+                {gameStatus === "won" ? (
+                  <span className="text-yellow-600">🎉 YOU WIN! 🎉</span>
+                ) : (
+                  <span className="text-red-600">💥 GAME OVER 💥</span>
+                )}
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">Click the reset button to play again</p>
+            </div>
+          )}
+
+          <div className="text-xs text-muted-foreground text-center max-w-md font-mono px-4">
+            <p>Left-click to reveal • Right-click to flag</p>
+            <p className="mt-1">
+              {gameMode === "speed"
+                ? "Beat the clock! Clear the board before time runs out!"
+                : "Find all mines without clicking on them!"}
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
   )
 }

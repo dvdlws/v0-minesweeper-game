@@ -1,13 +1,38 @@
+"use client"
+
+import { useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export default function History() {
+  useEffect(() => {
+    try {
+      // @ts-ignore
+      ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+      // @ts-ignore
+      ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+    } catch (e) {
+      console.error("AdSense error:", e)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto mb-6">
         <Link href="/">
           <Button variant="ghost">← Back to Game</Button>
         </Link>
+      </div>
+
+      <div className="max-w-4xl mx-auto mb-8">
+        <ins
+          className="adsbygoogle"
+          style={{ display: "block" }}
+          data-ad-client="ca-pub-3252021796682458"
+          data-ad-slot="5750387915"
+          data-ad-format="horizontal"
+          data-full-width-responsive="true"
+        ></ins>
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -193,6 +218,17 @@ export default function History() {
           >
             Play Minesweeper
           </a>
+        </div>
+
+        <div className="max-w-4xl mx-auto mt-8">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5750387915"
+            data-ad-format="horizontal"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
       </div>
     </div>

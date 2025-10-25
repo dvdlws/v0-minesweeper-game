@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +15,17 @@ export default function ToolsPage() {
   const safeCells = totalCells - mineCount
   const probability = revealedCells < safeCells ? ((mineCount / (totalCells - revealedCells)) * 100).toFixed(2) : "0.00"
 
+  useEffect(() => {
+    try {
+      // @ts-ignore
+      ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+      // @ts-ignore
+      ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+    } catch (e) {
+      console.error("AdSense error:", e)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -22,6 +33,17 @@ export default function ToolsPage() {
           <Link href="/">
             <Button variant="ghost">← Back to Game</Button>
           </Link>
+        </div>
+
+        <div className="mb-6">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5750387915"
+            data-ad-format="horizontal"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
 
         <div className="space-y-2">
@@ -191,6 +213,17 @@ export default function ToolsPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="mt-6">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-3252021796682458"
+            data-ad-slot="5750387915"
+            data-ad-format="horizontal"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
 
         <div className="text-center">
