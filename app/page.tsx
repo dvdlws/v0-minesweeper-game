@@ -19,6 +19,27 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4">
+      <nav className="w-full max-w-4xl flex justify-center gap-2 flex-wrap">
+        <Link href="/" className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium">
+          Minesweeper
+        </Link>
+        <Link href="/solitaire" className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm font-medium">
+          Solitaire
+        </Link>
+        <Link href="/sudoku" className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm font-medium">
+          Sudoku
+        </Link>
+        <Link href="/2048" className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm font-medium">
+          2048
+        </Link>
+        <Link href="/hangman" className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm font-medium">
+          Hangman
+        </Link>
+        <Link href="/wordle" className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm font-medium">
+          Wordle
+        </Link>
+      </nav>
+
       <header className="text-center max-w-3xl px-4">
         <h1 className="text-4xl font-bold mb-3 text-balance">Play Minesweeper Online Free</h1>
       </header>
@@ -157,9 +178,50 @@ export default function Home() {
         </section>
       </article>
 
+      <section className="max-w-4xl px-4 mt-8">
+        <h2 className="text-2xl font-bold mb-4 text-center">More Classic Games</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <Link href="/solitaire" className="block p-4 bg-card border border-border rounded-lg hover:bg-muted transition-colors text-center">
+            <h3 className="font-bold text-lg">Solitaire</h3>
+            <p className="text-sm text-muted-foreground">The classic card game</p>
+          </Link>
+          <Link href="/sudoku" className="block p-4 bg-card border border-border rounded-lg hover:bg-muted transition-colors text-center">
+            <h3 className="font-bold text-lg">Sudoku</h3>
+            <p className="text-sm text-muted-foreground">Number puzzle challenge</p>
+          </Link>
+          <Link href="/2048" className="block p-4 bg-card border border-border rounded-lg hover:bg-muted transition-colors text-center">
+            <h3 className="font-bold text-lg">2048</h3>
+            <p className="text-sm text-muted-foreground">Slide and merge tiles</p>
+          </Link>
+          <Link href="/hangman" className="block p-4 bg-card border border-border rounded-lg hover:bg-muted transition-colors text-center">
+            <h3 className="font-bold text-lg">Hangman</h3>
+            <p className="text-sm text-muted-foreground">Word guessing game</p>
+          </Link>
+          <Link href="/wordle" className="block p-4 bg-card border border-border rounded-lg hover:bg-muted transition-colors text-center">
+            <h3 className="font-bold text-lg">Wordle</h3>
+            <p className="text-sm text-muted-foreground">5-letter word puzzle</p>
+          </Link>
+        </div>
+      </section>
+
       <footer className="mt-12 text-center text-sm text-muted-foreground">
-        <p>© 2025 Minesweeper Online - Free Classic Puzzle Game</p>
+        <p>© 2025 Classic Games Online - Free Puzzle Games</p>
         <nav className="flex gap-4 justify-center mt-3 flex-wrap">
+          <Link href="/solitaire" className="text-primary hover:underline">
+            Solitaire
+          </Link>
+          <Link href="/sudoku" className="text-primary hover:underline">
+            Sudoku
+          </Link>
+          <Link href="/2048" className="text-primary hover:underline">
+            2048
+          </Link>
+          <Link href="/hangman" className="text-primary hover:underline">
+            Hangman
+          </Link>
+          <Link href="/wordle" className="text-primary hover:underline">
+            Wordle
+          </Link>
           <Link href="/tools" className="text-primary hover:underline">
             Tools
           </Link>
